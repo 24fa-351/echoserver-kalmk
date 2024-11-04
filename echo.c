@@ -2,12 +2,11 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <stdlib.h>
 
-#define PORT 46645
 #define LISTEN_BACKLOG 5
 #define BUFFER_SIZE 1024
 
@@ -36,13 +35,29 @@ void *handleConnection(void *client_socket)
 
 int main(int argc, char *argv[])
 {
+  int port = 46645; // default port
+  if (argc > 2 && strcmp(argv[1], "-p") == 0)
+  {
+    port = atoi(argv[2]);
+    if (port <= 0 || port > 65535)
+    {
+      fprintf(stderr, "Invalid port number. Please specify a port between 1 and 65535.\n");
+      return 1;
+    }
+  }
+  else if (argc > 1)
+  {
+    fprintf(stderr, "Usage: %s [-p port]\n", argv[0]);
+    return 1;
+  }
+
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   struct sockaddr_in socket_address;
   memset(&socket_address, '\0', sizeof(socket_address));
   socket_address.sin_family = AF_INET;
   socket_address.sin_addr.s_addr = htonl(INADDR_ANY);
-  socket_address.sin_port = htons(PORT);
+  socket_address.sin_port = htons(port);
 
   if (bind(socket_fd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
   {
@@ -56,7 +71,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  printf("Server listening on port %d\n", PORT);
+  printf("Server listening on port %d\n", port);
 
   while (1)
   {
