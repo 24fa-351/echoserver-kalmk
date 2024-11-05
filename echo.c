@@ -10,17 +10,17 @@
 #define PORT 46645
 #define LISTEN_BACKLOG 5
 
-void handleConnection(int client_fd)
+void handleConnection(int a_client)
 {
     char buffer[1024];
-    int bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+    int bytes_read = read(a_client, buffer, sizeof(buffer) - 1);
     if (bytes_read > 0)
     {
         buffer[bytes_read] = '\0';
         printf("Received: %s\n", buffer);
-        write(client_fd, buffer, bytes_read);
+        write(a_client, buffer, bytes_read);
     }
-    close(client_fd);
+    close(a_client);
 }
 
 int main(int argc, char *argv[])
